@@ -15,6 +15,8 @@
         <table>
         <tr>
         <td>
+
+            <c:out value="${reviewdesc}"/>
         <form:input type="text" path="reviewdesc" id="reviewdesc"/>
         </td>
         </tr>

@@ -1,6 +1,6 @@
-package com.dreamcompany.reviewapplication.productservice;
+package com.dreamcompany.reviewapplication;
 
-import com.dreamcompany.reviewapplication.productservice.model.Product;
+import com.dreamcompany.reviewapplication.userdetailservice.model.Product;
 import com.dreamcompany.reviewapplication.productservice.repository.ProductRepo;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;

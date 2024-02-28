@@ -1,6 +1,6 @@
 package com.dreamcompany.reviewapplication.userdetailservice.service;
 
-import com.dreamcompany.reviewapplication.productservice.model.Product;
+import com.dreamcompany.reviewapplication.userdetailservice.model.Product;
 import com.dreamcompany.reviewapplication.userdetailservice.model.Review;
 import com.dreamcompany.reviewapplication.userdetailservice.model.User;
 import com.dreamcompany.reviewapplication.userdetailservice.repository.UserRepo;
@@ -9,13 +9,10 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import redis.clients.jedis.Jedis;
 
-import javax.validation.constraints.Max;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -39,6 +36,9 @@ public class UserDetailService {
     {
         userRepo.save(userdetails);
     }
+
+
+
     @HystrixCommand(fallbackMethod = "getAllProductsFromFallback", commandProperties = {
 
             @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "2000"),
@@ -46,12 +46,10 @@ public class UserDetailService {
             @HystrixProperty(name = "circuitBreaker.errorThresholdPercentage", value = "50"),
             @HystrixProperty (name = "circuitBreaker.sleepWindowInMilliseconds", value = "500000")
     })
-
-
     public List<Product> getAllProducts()
     {
      // List list = restTemplate.getForObject("http://localhost:8086/products",List.class);
-        List list = restTemplate.getForObject("http://productservice/products",List.class);
+        List<Product> list = restTemplate.getForObject("http://productservice/products",List.class);
         //System.out.println("getAllProductsCalled");
         LOG.info("getAllProducts from DB : ",list.size());
         LOG.debug("getAllProducts from DB : ",list.size());

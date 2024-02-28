@@ -1,4 +1,4 @@
-package com.dreamcompany.reviewapplication.productservice.model;
+package com.dreamcompany.reviewapplication.userdetailservice.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -11,7 +11,7 @@ public class Review {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     int reviewId;
 
-    @JsonIgnore   //infinite recursion hogaya tha pata hai
+
     @ManyToOne
     @JoinColumn(name = "id" , nullable = false)
     private Product product;
@@ -59,4 +59,5 @@ public class Review {
         this.product = product;
         this.reviewdesc = reviewdesc;
     }
+
 }

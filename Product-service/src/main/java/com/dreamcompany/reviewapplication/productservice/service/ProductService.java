@@ -1,10 +1,9 @@
 package com.dreamcompany.reviewapplication.productservice.service;
 
-import com.dreamcompany.reviewapplication.productservice.model.Product;
-import com.dreamcompany.reviewapplication.productservice.model.Review;
+import com.dreamcompany.reviewapplication.userdetailservice.model.Product;
 import com.dreamcompany.reviewapplication.productservice.repository.ProductRepo;
+import com.dreamcompany.reviewapplication.userdetailservice.model.Review;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;

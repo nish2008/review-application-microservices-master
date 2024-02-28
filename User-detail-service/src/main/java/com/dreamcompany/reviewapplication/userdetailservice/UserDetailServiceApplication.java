@@ -2,9 +2,11 @@ package com.dreamcompany.reviewapplication.userdetailservice;
 
 import com.dreamcompany.reviewapplication.userdetailservice.model.Product;
 import com.dreamcompany.reviewapplication.userdetailservice.repository.ProductRepo;
+import org.apache.kafka.clients.admin.NewTopic;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.cache.annotation.EnableCaching;
@@ -13,16 +15,15 @@ import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.cloud.netflix.hystrix.dashboard.EnableHystrixDashboard;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.web.client.RestTemplate;
-import redis.clients.jedis.Jedis;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 @SpringBootApplication
@@ -46,7 +47,8 @@ public class UserDetailServiceApplication extends SpringBootServletInitializer {
 		return new RestTemplate();
 	}
 
-
+	@Bean
+	public WebClient.Builder getWebClientBuilder () { return WebClient.builder();}
 
 	@Bean
 	JedisConnectionFactory jedisConnectionFactory() {
@@ -58,8 +60,8 @@ public class UserDetailServiceApplication extends SpringBootServletInitializer {
 	}
 
 	@Bean
-	public RedisTemplate<String, List<com.dreamcompany.reviewapplication.productservice.model.Product>> redisTemplate() {
-		RedisTemplate<String, List<com.dreamcompany.reviewapplication.productservice.model.Product>> template = new RedisTemplate<>();
+	public RedisTemplate<String, List<com.dreamcompany.reviewapplication.userdetailservice.model.Product>> redisTemplate() {
+		RedisTemplate<String, List<com.dreamcompany.reviewapplication.userdetailservice.model.Product>> template = new RedisTemplate<>();
 		template.setConnectionFactory(jedisConnectionFactory());
 		return template;
 	}
@@ -85,6 +87,16 @@ public class UserDetailServiceApplication extends SpringBootServletInitializer {
 			}
 
 		};
+
 	}
+
+	@Bean
+	public NewTopic getLogDiaryTopic(){
+		return TopicBuilder.name("logdiary")
+				.partitions(2)
+				.replicas(2)
+				.build();
 	}
+
+}
 

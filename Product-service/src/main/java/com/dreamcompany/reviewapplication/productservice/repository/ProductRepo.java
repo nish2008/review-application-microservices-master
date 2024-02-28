@@ -2,7 +2,7 @@ package com.dreamcompany.reviewapplication.productservice.repository;
 
 
 
-import com.dreamcompany.reviewapplication.productservice.model.Product;
+import com.dreamcompany.reviewapplication.userdetailservice.model.Product;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,4 +1,4 @@
-package com.dreamcompany.reviewapplication.productservice.model;
+package com.dreamcompany.reviewapplication.userdetailservice.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -8,10 +8,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-
 @Entity
-public class Product implements Serializable {
-
+public class Product implements Serializable  {
     private static final long serialVersionUID = 7156526077883281623L;
 
     @Id
