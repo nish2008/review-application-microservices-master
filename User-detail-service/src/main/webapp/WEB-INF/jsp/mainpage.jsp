@@ -23,8 +23,8 @@
          <td>
          <c:out value="${product.productName}"/>
          </td>
-         <td><a href="/writereview?id=${product.id}">Write review</a></td>
-                  <td><a href="/readreview?id=${product.id}">Read review</a></td>
+         <td><a href="/user/writereview?id=${product.id}">Write review</a></td>
+                  <td><a href="/user/readreview?id=${product.id}">Read review</a></td>
          </tr>
           </c:forEach>
          </table>

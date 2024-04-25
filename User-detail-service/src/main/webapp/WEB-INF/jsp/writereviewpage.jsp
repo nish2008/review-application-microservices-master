@@ -11,7 +11,7 @@
 </head>
 <body>
 
-    <form:form action="/postreview" method="post" modelAttribute="review" name="form">
+    <form:form action="/user/postreview" method="post" modelAttribute="review" name="form">
         <table>
         <tr>
         <td>

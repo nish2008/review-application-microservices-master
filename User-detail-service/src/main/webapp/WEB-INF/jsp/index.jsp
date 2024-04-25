@@ -11,7 +11,7 @@
 </head>
 <body>
     <h2>Please provide your name and email-id to continue</h2>
-    <form:form action="/continue" method="post" modelAttribute="userdetails" name="form">
+    <form:form action="/user/continue" method="post" modelAttribute="userdetails" name="form">
         <table ><tr>
          <th>Name</th>
         <th>Email</th>

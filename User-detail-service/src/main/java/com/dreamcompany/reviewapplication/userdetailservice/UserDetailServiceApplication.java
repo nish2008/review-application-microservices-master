@@ -3,14 +3,15 @@ package com.dreamcompany.reviewapplication.userdetailservice;
 import com.dreamcompany.reviewapplication.userdetailservice.model.Product;
 import com.dreamcompany.reviewapplication.userdetailservice.repository.ProductRepo;
 import org.apache.kafka.clients.admin.NewTopic;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.cloud.netflix.hystrix.dashboard.EnableHystrixDashboard;
@@ -18,6 +19,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.config.TopicBuilder;
+import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -27,11 +29,18 @@ import java.util.Arrays;
 import java.util.List;
 
 @SpringBootApplication
-@EnableEurekaClient
+@EnableDiscoveryClient
 @EnableCircuitBreaker
 @EnableHystrixDashboard
 @EnableCaching
 public class UserDetailServiceApplication extends SpringBootServletInitializer {
+
+	@Value("${spring.redis.host}")
+	private String host;
+
+	@Value("${spring.redis.port}")
+	private int port;
+
 	@Override
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
 		return builder.sources(UserDetailServiceApplication.class);
@@ -48,14 +57,17 @@ public class UserDetailServiceApplication extends SpringBootServletInitializer {
 	}
 
 	@Bean
-	public WebClient.Builder getWebClientBuilder () { return WebClient.builder();}
+	@LoadBalanced
+	public WebClient.Builder webClientBuilder() {
+		return WebClient.builder();
+	}
 
 	@Bean
 	JedisConnectionFactory jedisConnectionFactory() {
 		JedisConnectionFactory jedisConFactory
 				= new JedisConnectionFactory();
-		jedisConFactory.setHostName("localhost");
-		jedisConFactory.setPort(6379);
+		jedisConFactory.setHostName(host);
+		jedisConFactory.setPort(port);
 		return jedisConFactory;
 	}
 

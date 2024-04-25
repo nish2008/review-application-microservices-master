@@ -38,4 +38,5 @@ public class ReviewController {
         kafkaTemplate.send("logdiary", "ReviewService: Review has been returned for the product : "+pid);
         return reviewService.getReviewsForProduct(pid);
     }
+
 }

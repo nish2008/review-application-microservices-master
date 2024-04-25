@@ -2,6 +2,7 @@ package com.dreamcompany.reviewapplication;
 
 import com.dreamcompany.reviewapplication.userdetailservice.model.Product;
 import com.dreamcompany.reviewapplication.productservice.repository.ProductRepo;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -26,6 +27,12 @@ public class ProductServiceApplication {
 		SpringApplication.run(ProductServiceApplication.class, args);
 	}
 
+	@Value("${spring.redis.host}")
+	private String host;
+
+	@Value("${spring.redis.port}")
+	private int port;
+
 	@Bean
 	public RestTemplate getRestTemplate(){
 		return new RestTemplate();
@@ -35,8 +42,8 @@ public class ProductServiceApplication {
 	JedisConnectionFactory jedisConnectionFactory() {
 		JedisConnectionFactory jedisConFactory
 				= new JedisConnectionFactory();
-		jedisConFactory.setHostName("localhost");
-		jedisConFactory.setPort(6379);
+		jedisConFactory.setHostName(host);
+		jedisConFactory.setPort(port);
 		return jedisConFactory;
 	}
 

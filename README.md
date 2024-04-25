@@ -1,254 +1,173 @@
 # review-application-microservices
 
-This is review application project using microservices, Spring MVC, Eureka, Hystrix and redis.
+Microservices are deployed in docker container.
 
-Microservices : User detail(Spring MVC) ---> Product service (Spring boot)
-                                        ---> Review service (Spring boot)
-					
-Project Structure : User details microservice (Using Spring MVC) will display index page which will take user name and email as input and then the user detail microservice will call product microservice(Using spring boot) , get the list of products and will display it. User detail microservice will also connect with review microservices for read review and post review.
-
-
-Below are the steps for Microservices and Spring MVC excluding Eureka, Hystrix and resdis.
-
-Step 1 : Download three microservices from start.spring.io : Userdetailservice, productservice, reviewservice
-
-step 2 : Add dependicies : User detail service dependencies 
-
-                 <dependencies>
-		 <dependency>
-                          // We use this dependency for repository to connect to database
-			  <groupId>org.springframework.boot</groupId>
-			  <artifactId>spring-boot-starter-data-jpa</artifactId>
-		 </dependency>
-                 // under web dependency we get rest template also
-		 <dependency>
-			  <groupId>org.springframework.boot</groupId>
-			  <artifactId>spring-boot-starter-web</artifactId>
-		 </dependency>
-                 <dependency>
-			  <groupId>org.apache.tomcat.embed</groupId>
-			  <artifactId>tomcat-embed-jasper</artifactId>
-			  <scope>provided</scope>
-		 </dependency>
-	 
-		<!-- jstl for jsp -->
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>jstl</artifactId>
-		</dependency>
-		<!-- help our project to become client -->
-		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-    <dependency>
-			<groupId>io.projectreactor</groupId>
-			<artifactId>reactor-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-    // We use webflux dependency to enable web client in our project
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-webflux</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>org.junit.vintage</groupId>
-					<artifactId>junit-vintage-engine</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-	</dependencies>
+1. Create DockerFile in each service which are required to deploy in container.
   
- Step 3 : Add product service dependencies :
- 
-        <dependencies>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-jpa</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-		</dependency>
-    <dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
-			<scope>runtime</scope>
-		</dependency>
+>Jar file 
+
+FROM openjdk:8-jdk
+ADD target/Review-Service-0.0.1-SNAPSHOT.jar Review-Service-0.0.1-SNAPSHOT.jar
+EXPOSE 8087
+ENTRYPOINT ["java","-jar","/Review-Service-0.0.1-SNAPSHOT.jar"]
+		
+>War file
+
+FROM tomcat:9.0-alpine
+COPY target/user.war /usr/local/tomcat/webapps/
+EXPOSE 8080
+CMD ["catalina.sh", "run"]
+		
+2. To build the docker image
+	$Docker built -t <image_name> <destination>
+	$Docker built -t kafka-service .
+
+	To add version of image
+	$Docker built -t <image_name>:<version> <destination>
+	$Docker built -t kafka-service:v2 .
+
+	To delete image
+	$docker image rm review_service
 
 
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>org.junit.vintage</groupId>
-					<artifactId>junit-vintage-engine</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-	</dependencies>
-  
-  step 3 : Add review service dependencies 
-  
-    <dependencies>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-jpa</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-		</dependency>
-    <dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>org.junit.vintage</groupId>
-					<artifactId>junit-vintage-engine</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-	</dependencies>
-  
-  Step 4 : Below are steps for user detail service
-  
-  Step 4.1 : For UserDetailServiceApplication class 
-  
-  4.1.1 Enable @SpringBootApplication annotation above UserDetailServiceApplication class
-  4.1.2 Extend SpringBootServletInitializer and override its configure method.
-  4.1.3 create a method to return rest template and add @Bean annotation above this method.
-  4.1.4 Use command liner to put the data in the database as soon as the application starts.
-  
-  step 4.2 create Model folder --> keep all the model classes.
-  
-  Step 4.3 under controller folder --> UserDetailController class
-  4.3.1 Enable @Controller annotation above UserDetailController class
-  4.3.2 create method for all the required mappings.
-  
-  Step 4.4 Create repository folder --> under this keep all the repositories ,put @Repository annotation above repository class and extend it to CrudRepository
-  
-  step 4.5 Create service folder --> under it UserDetailService class
-  4.5.1 Enable @Service annotation above UserDetailService class
-  4.5.2 keep all the service method.
-  4.5.3 To call productservice and reviewservice from UserDetailService, we will call like shown below
-  List list = restTemplate.getForObject("http://localhost:8086/products",List.class)
-  
-  Review review = restTemplate.getForObject("http://localhost:8087/writereview/"+ id ,Review.class);
-  
-  restTemplate.postForObject("http://localhost:8087/savedreview", review ,Review.class);
-  
-  List<Review> reviews = restTemplate.getForObject("http://localhost:8087/getreview/"+id,List.class);
-  
-  step 4.6 under webapp--> WEB-INF -->Jsp --> Put all the Jsp files
-  step 4.7 configure application.properties file
-  
-    spring.mvc.view.prefix: /WEB-INF/jsp/
-    spring.mvc.view.suffix: .jsp
+	To list of docker images
+	$Docker image ls
 
-    server.port = 8085
-    spring.application.name=userdetailservice
+	2.1 In our scenario builtin images are redis, bitnami/kafka, mysql from dockerhub.
 
-    spring.datasource.url=jdbc:mysql://localhost:3306/revapp_micro
-    spring.datasource.username=root
-    spring.datasource.password=mypass
-  
-    logging.level.org.springframework.web=DEBUG
-
-    # Only below details are required for in memory DB
-
-     spring.jpa.generate-ddl=true
-    # spring.jpa.hibernate.ddl-auto=update
-    spring.jpa.hibernate.ddl-auto=create-drop
-    spring.jpa.database=default
-    spring.jpa.show-sql=true
-  
- step 5:  Below are the steps for product service
- 
-  Step 5.1 : For ProductServiceApplication class
-  5.1.1 Enable @SpringBootApplication annotation above ProductServiceApplication class
-  
-  step 5.2 create Model folder --> keep all the model classes.
-  
-  Step 5.3 under controller folder --> ProductController class
-   5.3.1 Enable @RestController annotation above ProductController class
-   5.3.2 create method for all the required mappings.
-   
-  Step 5.4 Create repository folder --> under this keep all the repositories, put @Repository annotation above repository class and extend it to CrudRepository
-  
-  step 5.5 Create service folder --> under it ProducService class
-  5.5.1 Enable @Service annotation above UserDetailService class
-  5.5.2 keep all the service method.
-  
-  step 5.6 configure application.properties file
-  
-        server.port = 8086
-        spring.application.name=productservice
-
-        spring.datasource.url=jdbc:mysql://localhost:3306/revapp_micro
-        spring.datasource.username=root
-        spring.datasource.password=mypass
-
-        logging.level.org.springframework.web=DEBUG
-
-        # Only below details are required for in memory DB
-
-        spring.jpa.generate-ddl=true
-         spring.jpa.hibernate.ddl-auto=update
-       # spring.jpa.hibernate.ddl-auto=create
-      spring.jpa.database=default
-       spring.jpa.show-sql=true
-
-step 6:  Below are the steps for Review service
-same steps as Product Service
-
-Step 7 : Adding Eureka
-
-step 7.1 : download one project from start.spring.io, make it as Eureka server, To make it Eureka server
-7.1.1 Add below dependencies 
- We get all these under Eureka dependencies. Eureka is a client as well as a server.
- 
-     <dependencies>
-		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
-		</dependency>
-    
-7.1.2 Enable @SpringBootApplication and @EnableEurekaServer above EurekaServerApplication class.
-7.1.2 Configure application.properties
-
-    server.port=8761
-     eureka.client.register-with-eureka=false
-    eureka.client.fetch-registry=false
-
-step 7.2 Make User detail service, product service and review service as Eureka client.
-7.2.1  Enable @EnableEurekaClient annotation above UserDetailApplication, ProductServiceApplication and ReviewServiceApplication classes.
-7.2.2 Enable @LoadBalanced annotation above getRestTemplate method in Application class.
-7.2.3 Add below dependenices in all the three services to make them as Eureka client 
-
-     <dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
-		</dependency>
+	docker built -t product_service .
+	docker built -t review_service .
+	docker built -t user_service .
+	docker built -t consumer_service .
 	
 
-  
+	
+![ScreenShot](https://github.com/nish2008/review-application-microservices-master/blob/docker_deployment/images/Rancher_desktop_images_list_ui.png)
+
+3. Create docker networks
+	
+	docker create network mysql_net
+	docker create network redis_net
+	docker create network kafka_net
+	docker create network eureka_net
+	
+<img width="964" alt="docker network list" src="https://github.com/nish2008/review-application-microservices-master/blob/docker_deployment/images/network_list.png">
+
+4. Create/Run the container
+	
+	Docker run -p 3306:3306 --name --net mysql_net mysql_container -e MYSQL_ROOT_PASSWORD=mypass -e MYSQL_DATABASE=revapp_micro -d mysql
+
+	Docker run -d --name kafka --hostname kafka \
+    --network kafka_net \
+    -e KAFKA_CFG_NODE_ID=0 \
+	-e KAFKA_KRAFT_CLUSTER_ID=my-cluster \
+	-e KAFKA_ENABLE_KRAFT=yes \
+    -e KAFKA_CFG_PROCESS_ROLES=controller,broker \
+    -e KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093 \
+    -e KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT \
+    -e KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093 \
+    -e KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER \
+    bitnami/kafka
+
+	Docker run -d -p 6379:6379 --name redis --net redis_net redis
+
+	Docker run -d -p 8761:8761 --net eureka_net --name eureka-server eureka-server
+
+	Docker create -p 8086:8086 --name product_container --net eureka_net  --restart unless-stopped  -e MYSQL_HOST=mysql_container -e MYSQL_PORT=3306  -e MYSQL_DB_NAME=revapp_micro -e MYSQL_USER=root -e MYSQL_ROOT:mypass -e REDIS_HOST=redis -e REDIS_PORT=6379 -e KAFKA_HOST=kafka -e KAFKA_PORT=9092 -e EUREKA_HOST=eureka-server -e EUREKA_PORT=8761  product_service
+
+	Docker network connect mysql_net product_container
+	Docker network connect redis_net product_container
+	Docker network connect kafka_net product_container
+
+	Docker start product_container
+
+	Docker logs -f product_container
+	
+	Docker run -p 8087:8087 --name review_container --net mysql_net --restart unless-stopped -e MYSQL_HOST=mysql_container -e MYSQL_PORT=3306  -e MYSQL_DB_NAME=revapp_micro -e MYSQL_USER=root -e MYSQL_ROOT:mypass -e KAFKA_HOST=kafka -e KAFKA_PORT=9092 -e EUREKA_HOST=eureka-server -e EUREKA_PORT=8761 -d review_service
+
+	Docker network connect kafka_net review_container
+	Docker network connect eureka_net review_container
+	
+	Docker start review_container
+	Docker inspect review_container
+	
+	Docker create -p 8085:8080 --name user_container --net mysql_net --restart unless-stopped -e MYSQL_HOST=mysql_container -e MYSQL_PORT=3306  -e MYSQL_DB_NAME=revapp_micro -e MYSQL_USER=root -e MYSQL_ROOT:mypass -e KAFKA_HOST=kafka -e KAFKA_PORT=9092 -e EUREKA_HOST=eureka-server -e EUREKA_PORT=8761 -e REDIS_HOST=redis -e REDIS_PORT=6379  userdetailservice
+
+	Docker network connect kafka_net user_container
+	Docker network connect eureka_net user_container
+	Docker network connect redis_net user_container
+
+	Docker start user_container
+
+	Docker logs -f user_container
+	
+	curl localhost:8086/products
+	
+# Product service curl
+
+<img width="964" alt="product service curl" src="https://github.com/nish2008/review-application-microservices-master/blob/docker_deployment/images/product_service_curl.png">
+	
+	curl localhost:8087/writereview/11
+	
+# Review service curl
+	
+<img width="964" alt="review service curl" src="https://github.com/nish2008/review-application-microservices-master/blob/docker_deployment/images/review_service_curl.png">
+	
+	
+	Docker create -p 8088:8080 --name consumer_container --net kafka_net --restart unless-stopped  -e KAFKA_HOST=kafka -e KAFKA_PORT=9092 -e EUREKA_HOST=eureka-server -e EUREKA_PORT=8761  consumer_service
+
+	Docker network connect eureka_net consumer_container  
+
+	Docker start consumer_container
+
+	Docker logs -f consumer_container
+
+	Docker port consumer_container
+	
+# List of all containers
+	
+<img width="964" alt="List of all containers" src="https://github.com/nish2008/review-application-microservices-master/blob/docker_deployment/images/Container_list.png">
+	
+	4. Test the application 
+	
+# Eureka server : 
+	
+	http://localhost:8761/
+	
+<img width="964" alt="Eureka server" src="https://github.com/nish2008/review-application-microservices-master/blob/docker_deployment/images/Eureka_server.png">
+	
+# Tomcate server : 
+	
+	http://localhost:8085/
+	
+<img width="964" alt="Tomcate server" src="https://github.com/nish2008/review-application-microservices-master/blob/docker_deployment/images/User_tomcat_server.png">
+	
+# Welcome page
+	
+	http://localhost:8085/user/userdetailpage
+	
+<img width="964" alt="welcome page" src="https://github.com/nish2008/review-application-microservices-master/blob/docker_deployment/images/Welcome_page_from_user_service.png">
+	
+# List of products from product service
+	
+	http://localhost:8085/user/continue
+	
+<img width="964" alt="List of products" src="https://github.com/nish2008/review-application-microservices-master/blob/docker_deployment/images/List_of_products_from_product_services.png">
+	
+# Review submission form to review service
+	
+	http://localhost:8085/user/writereview?id=11
+	
+<img width="964" alt="Review submission form to review service" src="https://github.com/nish2008/review-application-microservices-master/blob/docker_deployment/images/Review_form_from_review_services.png">
+	
+# Acknowledgment review saved
+	
+	http://localhost:8085/user/postreview
+	
+<img width="964" alt="Acknowledgment review saved" src="https://github.com/nish2008/review-application-microservices-master/blob/docker_deployment/images/Final_submission.png">
+	
+# Logs consumer from kafka
+	
+	http://localhost:8088/kafka-consumer/ajax
+	
+<img width="964" alt="logs consumer from kafka" src="https://github.com/nish2008/review-application-microservices-master/blob/docker_deployment/images/Consumer_service.png">

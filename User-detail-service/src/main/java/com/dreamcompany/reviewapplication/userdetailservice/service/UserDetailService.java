@@ -6,12 +6,14 @@ import com.dreamcompany.reviewapplication.userdetailservice.model.User;
 import com.dreamcompany.reviewapplication.userdetailservice.repository.UserRepo;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
+import org.apache.http.HttpHeaders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,6 +30,10 @@ public class UserDetailService {
 
     @Autowired
     RestTemplate restTemplate;
+
+    @Autowired
+    WebClient.Builder webClientBuilder;
+
 
     @Autowired
     RedisTemplate<String, List<Product>> redisTemplate;
@@ -49,7 +55,14 @@ public class UserDetailService {
     public List<Product> getAllProducts()
     {
      // List list = restTemplate.getForObject("http://localhost:8086/products",List.class);
-        List<Product> list = restTemplate.getForObject("http://productservice/products",List.class);
+        //List<Product> list = restTemplate.getForObject("http://productservice/products",List.class);
+
+        List<Product> list = webClientBuilder.build().get().uri("http://productservice/products")
+                .header(HttpHeaders.CONTENT_TYPE,"application/json")
+                .header(HttpHeaders.USER_AGENT,"Spring 5 WebClient")
+                .retrieve()
+                .bodyToMono(ArrayList.class)
+                .block();
         //System.out.println("getAllProductsCalled");
         LOG.info("getAllProducts from DB : ",list.size());
         LOG.debug("getAllProducts from DB : ",list.size());

@@ -13,6 +13,7 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<name>Kafka-Server</name>
 	<description>Kafka</description>
+	<packaging>war</packaging>
 	<properties>
 		<java.version>1.8</java.version>
 		<spring-cloud.version>Hoxton.SR4</spring-cloud.version>
@@ -79,6 +80,9 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<finalName>kafka-consumer</finalName>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

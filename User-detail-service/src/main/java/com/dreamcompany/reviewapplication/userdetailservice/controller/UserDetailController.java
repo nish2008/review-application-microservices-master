@@ -5,6 +5,7 @@ import com.dreamcompany.reviewapplication.userdetailservice.model.User;
 import com.dreamcompany.reviewapplication.userdetailservice.service.UserDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,6 +33,7 @@ public class UserDetailController {
 
     }
 
+    @Retryable
     @PostMapping("/continue")
     public String continuemethod(@ModelAttribute("userdetails") User userdetails, Model model) {
 
@@ -42,6 +44,7 @@ public class UserDetailController {
         return "mainpage";
     }
 
+    @Retryable
     @GetMapping("/writereview")
     public String writereview(Model model,@RequestParam(value="id") int id) {
         Review review = userDetailService.writereview(id);
@@ -52,6 +55,7 @@ public class UserDetailController {
 
     }
 
+    @Retryable
     @PostMapping("/postreview")
     public String reviewdesc(@ModelAttribute("review") Review review)
     {
@@ -60,6 +64,7 @@ public class UserDetailController {
         return "reviewsavedsuccessful";
     }
 
+    @Retryable
     @GetMapping("/readreview")
     public String readReview(Model model,@RequestParam(value="id") int id) {
          List<Review> reviews = userDetailService.readReviews(id);
