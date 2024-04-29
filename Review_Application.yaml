@@ -1,0 +1,157 @@
+version: "1.0"
+services:
+  mysql_container:
+    image: mysql
+    container_name: mysql_container
+    ports:
+      - 3306:3306
+    networks:
+      - mysql_network
+    environment:
+      - MYSQL_ROOT_PASSWORD=mypass
+      - MYSQL_DATABASE=revapp_micro
+  eureka-server:
+    build: Eureka-server\
+    image: eureka-server
+    container_name: eureka-server
+    ports:
+      - 8761:8761
+    networks:
+      - eureka_network
+  kafka:
+    image: bitnami/kafka
+    container_name: kafka
+    ports:
+    - 9092:9092
+    environment:
+      - KAFKA_CFG_NODE_ID=0
+      - KAFKA_KRAFT_CLUSTER_ID=my-cluster
+      - KAFKA_ENABLE_KRAFT=yes
+      - KAFKA_CFG_PROCESS_ROLES=controller,broker
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+    networks:
+      - kafka_network
+  redis:
+    image: redis
+    container_name: redis
+    ports:
+    - 6379:6379
+    networks:
+      - redis_network
+  review_service:
+    build: Review-Service\
+    image: review_service
+    container_name: review_container
+    ports:
+      - 8087:8087
+    networks:
+      - mysql_network
+      - eureka_network
+      - kafka_network
+    environment:
+      - MYSQL_HOST=mysql_container
+      - MYSQL_PORT=3306
+      - MYSQL_DB_NAME=revapp_micro
+      - MYSQL_USER=root
+      - MYSQL_ROOT=mypass
+      - KAFKA_HOST=kafka
+      - KAFKA_PORT=9092
+      - EUREKA_HOST=eureka-server
+      - EUREKA_PORT=8761
+    depends_on:
+      - mysql_container
+      - eureka-server
+      - kafka
+    restart: unless-stopped
+  product_service:
+    build: Product-service\
+    image: product_service
+    container_name: product_container
+    ports:
+      - 8086:8086
+    networks:
+      - mysql_network
+      - eureka_network
+      - kafka_network
+      - redis_network
+    environment:
+      - MYSQL_HOST=mysql_container
+      - MYSQL_PORT=3306
+      - MYSQL_DB_NAME=revapp_micro
+      - MYSQL_USER=root
+      - MYSQL_ROOT=mypass
+      - KAFKA_HOST=kafka
+      - KAFKA_PORT=9092
+      - EUREKA_HOST=eureka-server
+      - EUREKA_PORT=8761
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - mysql_container
+      - eureka-server
+      - kafka
+      - redis
+    restart: unless-stopped
+  user_service:
+    build: User-detail-service\
+    image: user_service
+    container_name: user_container
+    ports:
+      - 8085:8080
+    networks:
+      - mysql_network
+      - eureka_network
+      - kafka_network
+      - redis_network
+    environment:
+      - MYSQL_HOST=mysql_container
+      - MYSQL_PORT=3306
+      - MYSQL_DB_NAME=revapp_micro
+      - MYSQL_USER=root
+      - MYSQL_ROOT=mypass
+      - KAFKA_HOST=kafka
+      - KAFKA_PORT=9092
+      - EUREKA_HOST=eureka-server
+      - EUREKA_PORT=8761
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - mysql_container
+      - eureka-server
+      - kafka
+      - redis
+      - review_service
+      - product_service
+    restart: unless-stopped
+  consumer_service:
+    build: KafkaServer\
+    image: consumer_service
+    container_name: consumer_container
+    ports:
+      - 8088:8080
+    networks:
+      - eureka_network
+      - kafka_network
+    environment:
+      - KAFKA_HOST=kafka
+      - KAFKA_PORT=9092
+      - EUREKA_HOST=eureka-server
+      - EUREKA_PORT=8761
+    depends_on:
+      - eureka-server
+      - kafka
+    restart: unless-stopped
+networks:
+  mysql_network:
+    name: mysql_network
+  eureka_network:
+    name: eureka_network
+  kafka_network:
+    name: kafka_network
+  redis_network:
+    name: redis_network
+
+

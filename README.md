@@ -6,38 +6,41 @@ Microservices are deployed in docker container.
   
 >Jar file 
 
-FROM openjdk:8-jdk
-ADD target/Review-Service-0.0.1-SNAPSHOT.jar Review-Service-0.0.1-SNAPSHOT.jar
-EXPOSE 8087
+FROM openjdk:8-jdk \
+ADD target/Review-Service-0.0.1-SNAPSHOT.jar Review-Service-0.0.1-SNAPSHOT.jar \
+EXPOSE 8087 \
 ENTRYPOINT ["java","-jar","/Review-Service-0.0.1-SNAPSHOT.jar"]
 		
 >War file
 
-FROM tomcat:9.0-alpine
-COPY target/user.war /usr/local/tomcat/webapps/
-EXPOSE 8080
+FROM tomcat:9.0-alpine \
+COPY target/user.war /usr/local/tomcat/webapps/ \
+EXPOSE 8080 \
 CMD ["catalina.sh", "run"]
 		
 2. To build the docker image
-	$Docker built -t <image_name> <destination>
-	$Docker built -t kafka-service .
+	$Docker built -t <image_name> <destination_address> \
+	$Docker built -t kafka-service . 
 
-	To add version of image
-	$Docker built -t <image_name>:<version> <destination>
+	To add version of image 
+	
+	$Docker built -t <image_name>:<version> <destination_address> \
 	$Docker built -t kafka-service:v2 .
 
 	To delete image
+	
 	$docker image rm review_service
 
 
 	To list of docker images
+	
 	$Docker image ls
 
 	2.1 In our scenario builtin images are redis, bitnami/kafka, mysql from dockerhub.
 
-	docker built -t product_service .
-	docker built -t review_service .
-	docker built -t user_service .
+	docker built -t product_service . \
+	docker built -t review_service . \
+	docker built -t user_service . \
 	docker built -t consumer_service .
 	
 
@@ -46,9 +49,9 @@ CMD ["catalina.sh", "run"]
 
 3. Create docker networks
 	
-	docker create network mysql_net
-	docker create network redis_net
-	docker create network kafka_net
+	docker create network mysql_net \
+	docker create network redis_net \
+	docker create network kafka_net \
 	docker create network eureka_net
 	
 <img width="964" alt="docker network list" src="https://github.com/nish2008/review-application-microservices-master/blob/docker_deployment/images/network_list.png">
@@ -75,8 +78,8 @@ CMD ["catalina.sh", "run"]
 
 	Docker create -p 8086:8086 --name product_container --net eureka_net  --restart unless-stopped  -e MYSQL_HOST=mysql_container -e MYSQL_PORT=3306  -e MYSQL_DB_NAME=revapp_micro -e MYSQL_USER=root -e MYSQL_ROOT:mypass -e REDIS_HOST=redis -e REDIS_PORT=6379 -e KAFKA_HOST=kafka -e KAFKA_PORT=9092 -e EUREKA_HOST=eureka-server -e EUREKA_PORT=8761  product_service
 
-	Docker network connect mysql_net product_container
-	Docker network connect redis_net product_container
+	Docker network connect mysql_net product_container \
+	Docker network connect redis_net product_container \
 	Docker network connect kafka_net product_container
 
 	Docker start product_container
@@ -85,16 +88,16 @@ CMD ["catalina.sh", "run"]
 	
 	Docker run -p 8087:8087 --name review_container --net mysql_net --restart unless-stopped -e MYSQL_HOST=mysql_container -e MYSQL_PORT=3306  -e MYSQL_DB_NAME=revapp_micro -e MYSQL_USER=root -e MYSQL_ROOT:mypass -e KAFKA_HOST=kafka -e KAFKA_PORT=9092 -e EUREKA_HOST=eureka-server -e EUREKA_PORT=8761 -d review_service
 
-	Docker network connect kafka_net review_container
+	Docker network connect kafka_net review_container \
 	Docker network connect eureka_net review_container
 	
-	Docker start review_container
+	Docker start review_container \
 	Docker inspect review_container
 	
 	Docker create -p 8085:8080 --name user_container --net mysql_net --restart unless-stopped -e MYSQL_HOST=mysql_container -e MYSQL_PORT=3306  -e MYSQL_DB_NAME=revapp_micro -e MYSQL_USER=root -e MYSQL_ROOT:mypass -e KAFKA_HOST=kafka -e KAFKA_PORT=9092 -e EUREKA_HOST=eureka-server -e EUREKA_PORT=8761 -e REDIS_HOST=redis -e REDIS_PORT=6379  userdetailservice
 
-	Docker network connect kafka_net user_container
-	Docker network connect eureka_net user_container
+	Docker network connect kafka_net user_container \
+	Docker network connect eureka_net user_container \
 	Docker network connect redis_net user_container
 
 	Docker start user_container
@@ -102,6 +105,14 @@ CMD ["catalina.sh", "run"]
 	Docker logs -f user_container
 	
 	curl localhost:8086/products
+	
+5. Docker Compose
+
+	Docker-compose -f Review_Application.yaml up \
+	Docker-compose -f Review_Application.yaml up -d \
+	Docker-compose -f Review_Application.yaml down \
+	Docker-compose -f Review_Application.yaml stop 	 
+	
 	
 # Product service curl
 
