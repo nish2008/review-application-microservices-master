@@ -94,7 +94,7 @@ CMD ["catalina.sh", "run"]
 	Docker start review_container \
 	Docker inspect review_container
 	
-	Docker create -p 8085:8080 --name user_container --net mysql_net --restart unless-stopped -e MYSQL_HOST=mysql_container -e MYSQL_PORT=3306  -e MYSQL_DB_NAME=revapp_micro -e MYSQL_USER=root -e MYSQL_ROOT:mypass -e KAFKA_HOST=kafka -e KAFKA_PORT=9092 -e EUREKA_HOST=eureka-server -e EUREKA_PORT=8761 -e REDIS_HOST=redis -e REDIS_PORT=6379  userdetailservice
+	Docker create -p 8085:8080 --name user_container --net mysql_net --restart unless-stopped -e MYSQL_HOST=mysql_container -e MYSQL_PORT=3306  -e MYSQL_DB_NAME=revapp_micro -e MYSQL_USER=root -e MYSQL_ROOT:mypass -e KAFKA_HOST=kafka -e KAFKA_PORT=9092 -e EUREKA_HOST=eureka-server -e EUREKA_PORT=8761 -e REDIS_HOST=redis -e REDIS_PORT=6379  user_service
 
 	Docker network connect kafka_net user_container \
 	Docker network connect eureka_net user_container \
@@ -103,10 +103,21 @@ CMD ["catalina.sh", "run"]
 	Docker start user_container
 
 	Docker logs -f user_container
+
+	Docker network connect eureka_net consumer_container  
+
+	Docker start consumer_container
+
+	Docker logs -f consumer_container
+
+	Docker port consumer_container
+
+![image](https://github.com/nish2008/review-application-microservices-master/assets/25917161/230f6a9e-4752-4ab5-9a3e-a473af57cbb7)
+
 	
 	curl localhost:8086/products
 	
-5. Docker Compose
+6. Docker Compose
 
 	Docker-compose -f Review_Application.yaml up \
 	Docker-compose -f Review_Application.yaml up -d \
