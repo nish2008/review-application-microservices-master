@@ -82,7 +82,9 @@ CMD ["catalina.sh", "run"]
 	Docker network connect redis_net product_container \
 	Docker network connect kafka_net product_container
 
-	Docker start product_container
+	Docker container ps
+ 
+ 	Docker start product_container
 
 	Docker logs -f product_container
 	
@@ -106,7 +108,7 @@ CMD ["catalina.sh", "run"]
 	
 	curl localhost:8086/products
 	
-5. Docker Compose
+6. Docker Compose
 
 	Docker-compose -f Review_Application.yaml up \
 	Docker-compose -f Review_Application.yaml up -d \
